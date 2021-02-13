@@ -1,4 +1,4 @@
-function sandboxJsonp(url, callbackName) {
+export function sandboxJsonp(url, callbackName) {
   return new Promise(success => {
     const iframe = document.createElement("iframe");
     iframe.height = "0";
