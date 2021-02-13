@@ -3,7 +3,7 @@ export function sandboxJsonp(url, callbackName) {
     const iframe = document.createElement("iframe");
     iframe.height = "0";
     iframe.width = "0";
-    iframe.setAttribute("frameborder", "0");
+    iframe.hidden = true;
     iframe.setAttribute("sandbox", "allow-scripts");
 
     const script = document.createElement("script");
