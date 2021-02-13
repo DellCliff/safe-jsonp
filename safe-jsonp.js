@@ -7,7 +7,7 @@ export function sandboxJsonp(url, callbackName) {
     iframe.setAttribute("sandbox", "allow-scripts");
 
     const script = document.createElement("script");
-    script.innerText = `
+    script.textContent = `
       window.addEventListener('message', messageEvent => {
         window[messageEvent.data.callbackName] = result => window.parent.postMessage(result, messageEvent.origin);
         const script = document.createElement("script");
