@@ -1,6 +1,6 @@
-const errorCodeOnWindowError = "a17fccef-ddcf-4386-8f31-05cd6d9490f0";
-const errorCodeOnScriptError = "ee8c8441-e594-440e-832e-8f3d023fbe87";
-const errorCodeOnTimeout = "be868a85-9ff3-4c69-8ee6-abd7576e3398";
+export const errorCodeOnWindowError = "a17fccef-ddcf-4386-8f31-05cd6d9490f0";
+export const errorCodeOnScriptError = "ee8c8441-e594-440e-832e-8f3d023fbe87";
+export const errorCodeOnTimeout = "be868a85-9ff3-4c69-8ee6-abd7576e3398";
 
 function createSandbox() {
   const iframe = document.createElement("iframe");
@@ -26,44 +26,28 @@ function createSandbox() {
           } catch (ignore) {}
         }
 
-        let sentReply = false;
-
         window.onerror = () => {
-          if (!sentReply) {
-            cleanup();
-            sentReply = true;
-            window.parent.postMessage({error: JSON.parse(${JSON.stringify(errorCodeOnWindowError)})}, "*");
-          }
+          cleanup();
+          window.parent.postMessage({error: data.errorCodeOnWindowError}, "*");
         };
 
         script.onerror = () => {
-          if (!sentReply) {
-            cleanup();
-            sentReply = true;
-            window.parent.postMessage({error: JSON.parse(${JSON.stringify(errorCodeOnScriptError)})}, "*");
-          }
+          cleanup();
+          window.parent.postMessage({error: data.errorCodeOnScriptError}, "*");
         };
 
         script.onload = () => {
-          if (!sentReply) {
-            timeoutToken = setTimeout(
-              () => {
-                if (!sentReply) {
-                  cleanup();
-                  sentReply = true;
-                  window.parent.postMessage({error: JSON.parse(${JSON.stringify(errorCodeOnTimeout)})}, "*");
-                }
-              },
-              data.timeout);
-          }
+          timeoutToken = setTimeout(
+            () => {
+              cleanup();
+              window.parent.postMessage({error: data.errorCodeOnTimeout}, "*");
+            },
+            data.timeout);
         };
 
         window[data.callbackName] = response => {
-          if (!sentReply) {
-            cleanup();
-            sentReply = true;
-            window.parent.postMessage({response}, "*");
-          }
+          cleanup();
+          window.parent.postMessage({response}, "*");
         };
 
         document.body.appendChild(script);
@@ -103,7 +87,7 @@ function sandboxJsonp(sandbox, url, callbackName, timeout) {
     }
     window.addEventListener('message', onMessage);
 
-    sandbox.contentWindow.postMessage({url, callbackName}, "*");
+    sandbox.contentWindow.postMessage({url, callbackName, timeout, errorCodeOnWindowError, errorCodeOnScriptError, errorCodeOnTimeout}, "*");
   });
 }
 
