@@ -76,9 +76,9 @@ function createSandbox() {
     iframe.srcdoc = body.outerHTML;
   }
 
-  return new Promise(success => {
+  return new Promise(resolve => {
     iframe.onload = () => {
-      success(iframe);
+      resolve(iframe);
       iframe.onload = null;
     };
 
