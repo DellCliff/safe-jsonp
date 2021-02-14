@@ -17,8 +17,8 @@ function createSandbox() {
 
         function cleanup() {
           delete window[data.callbackName];
-          script.onerror = null;
           script.onload = null;
+          script.onerror = null;
           window.onerror = null;
           clearTimeout(timeoutToken);
           try {
