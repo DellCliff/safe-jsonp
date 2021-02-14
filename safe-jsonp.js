@@ -1,37 +1,62 @@
-export function sandboxJsonp(url, callbackName) {
+function createSandbox() {
   return new Promise(success => {
     const iframe = document.createElement("iframe");
-    iframe.height = "0";
-    iframe.width = "0";
     iframe.hidden = true;
     iframe.setAttribute("sandbox", "allow-scripts");
 
-    const script = document.createElement("script");
-    script.textContent = `
-      window.addEventListener('message', messageEvent => {
-        window[messageEvent.data.callbackName] = result => window.parent.postMessage(result, messageEvent.origin);
-        const script = document.createElement("script");
-        script.src = messageEvent.data.url;
-        document.body.appendChild(script);
-      });
-    `;
+    {
+      const script = document.createElement("script");
+      script.textContent = `
+        window.onmessage = ({data}) => {
+          const script = document.createElement("script");
+          script.src = data.url;
 
-    const body = document.createElement("body");
-    body.appendChild(script);
+          window[data.callbackName] = response => {
+            window.parent.postMessage({response, requestId: data.requestId}, "*");
 
-    iframe.srcdoc = body.outerHTML;
+            document.body.removeChild(script);
+            delete window[data.callbackName];
+          };
 
-    window.addEventListener('message', messageEvent => {
-      if (messageEvent.origin !== "null" || messageEvent.source !== iframe.contentWindow) {
+          document.body.appendChild(script);
+        };
+      `;
+
+      const body = document.createElement("body");
+      body.appendChild(script);
+
+      iframe.srcdoc = body.outerHTML;
+    }
+
+    iframe.onload = () => {
+      success(iframe);
+      iframe.onload = null;
+    };
+
+    document.body.appendChild(iframe);
+  });
+}
+
+function sandboxJsonp(sandbox, url, callbackName) {
+  return new Promise(success => {
+    const request = { url, callbackName, requestId: Math.random() };
+
+    function onMessage({source, data}) {
+      if (source !== sandbox.contentWindow || data.requestId !== request.requestId) {
         return;
       }
 
-      iframe.parentNode.removeChild(iframe);
+      success(data.response);
 
-      success(messageEvent.data);
-    });
+      window.removeEventListener('message', onMessage);
+    }
+    window.addEventListener('message', onMessage);
 
-    document.body.appendChild(iframe);
-    iframe.contentWindow.postMessage({ url, callbackName }, "*");
+    sandbox.contentWindow.postMessage(request, "*");
   });
+}
+
+export function jsonpSandbox() {
+  const sandbox = createSandbox();
+  return async (url, callbackName) => await sandboxJsonp(await sandbox, url, callbackName);
 }
