@@ -32,7 +32,7 @@ function createSandbox() {
           if (!sentReply) {
             cleanup();
             sentReply = true;
-            window.parent.postMessage({error: "${errorCodeOnWindowError}"}, "*");
+            window.parent.postMessage({error: JSON.parse(${JSON.stringify(errorCodeOnWindowError)})}, "*");
           }
         };
 
@@ -40,7 +40,7 @@ function createSandbox() {
           if (!sentReply) {
             cleanup();
             sentReply = true;
-            window.parent.postMessage({error: "${errorCodeOnScriptError}"}, "*");
+            window.parent.postMessage({error: JSON.parse(${JSON.stringify(errorCodeOnScriptError)})}, "*");
           }
         };
 
@@ -51,7 +51,7 @@ function createSandbox() {
                 if (!sentReply) {
                   cleanup();
                   sentReply = true;
-                  window.parent.postMessage({error: "${errorCodeOnTimeout}"}, "*");
+                  window.parent.postMessage({error: JSON.parse(${JSON.stringify(errorCodeOnTimeout)})}, "*");
                 }
               },
               data.timeout);
